@@ -14,6 +14,7 @@ import { Resume } from './resume';
 import { CurrentPlaylist } from './current.playlist';
 import { CurrentEpisode } from './current.episode';
 import { CurrentShow } from './current.show';
+import { CurrentTrack } from './current.track';
 import { Validate } from './validate';
 import { PlayerService } from './player.service';
 import { Monitor } from './monitor';
@@ -37,6 +38,7 @@ export class MediaService {
   public readonly playlist$: Observable<CurrentPlaylist>;
   public readonly episode$: Observable<CurrentEpisode>;
   public readonly show$: Observable<CurrentShow>;
+  public readonly track$: Observable<CurrentTrack>;
   public readonly validate$: Observable<Validate>;
 
   private rawMediaSubject = new Subject<Media[]>();
@@ -83,6 +85,12 @@ export class MediaService {
     );
     this.show$ = interval(1000).pipe( // Once a second after subscribe, way too frequent!
       switchMap((): Observable<CurrentShow> => this.http.get<CurrentShow>('http://' + this.hostname + ':5005/show')),
+      // Replay the most recent (bufferSize) emission on each subscription
+      // Keep the buffered emission(s) (refCount) even after everyone unsubscribes. Can cause memory leaks.
+      shareReplay({ bufferSize: 1, refCount: false }),
+    );
+    this.show$ = interval(1000).pipe( // Once a second after subscribe, way too frequent!
+      switchMap((): Observable<CurrentTrack> => this.http.get<CurrentTrack>('http://' + this.hostname + ':5005/track')),
       // Replay the most recent (bufferSize) emission on each subscription
       // Keep the buffered emission(s) (refCount) even after everyone unsubscribes. Can cause memory leaks.
       shareReplay({ bufferSize: 1, refCount: false }),
@@ -305,8 +313,20 @@ export class MediaService {
                           })
                         ),
                         of([item]) // Single album. Also return as array, so we always have the same data type
-                )
-              )
+                    ),
+                    iif(
+                      () => (item.type === 'spotify' && item.trackid && item.trackid.length > 0) ? true : false, // Get media by track
+                        this.spotifyService.getMediaByTrackID(item.trackid, item.category, item.index, item.shuffle, item.artistcover).pipe(
+                          map(currentItem => {  // If the user entered an user-defined artist or album name, overwrite values from spotify
+                            if (item.artist?.length > 0) {
+                              currentItem.artist = item.artist;
+                            }
+                            return [currentItem];
+                          })
+                        ),
+                        of([item]) // Single album. Also return as array, so we always have the same data type
+                    )
+                ) 
             )
           )
         )

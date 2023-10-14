@@ -3,7 +3,7 @@ import { Observable, defer, throwError, of, range } from 'rxjs';
 import { retryWhen, flatMap, tap, delay, take, map, mergeMap, mergeAll, toArray } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { SpotifyAlbumsResponse, SpotifyAlbumsResponseItem, SpotifyArtistResponse, SpotifyArtistsAlbumsResponse, SpotifyEpisodesResponse, SpotifyShowResponse } from './spotify';
+import { SpotifyAlbumsResponse, SpotifyAlbumsResponseItem, SpotifyArtistResponse, SpotifyArtistsAlbumsResponse, SpotifyEpisodesResponse, SpotifyShowResponse, SpotifyTrackResponseItem } from './spotify';
 import { Media } from './media';
 
 declare const require: any;
@@ -221,6 +221,33 @@ export class SpotifyService {
       map((response: SpotifyAlbumsResponseItem) => {
         const media: Media = {
           playlistid: response.id,
+          artist: response.artists?.[0]?.name,
+          title: response.name,
+          cover: response?.images[0]?.url,
+          type: 'spotify',
+          category,
+          index
+        };
+        if(artistcover) {
+          media.artistcover = artistcover;
+        }
+        if(shuffle) {
+          media.shuffle = shuffle;
+        }
+        return media;
+      })
+    );
+    return album;
+  }
+
+  getMediaByTrackID(id: string, category: string, index: number, shuffle: boolean, artistcover: string): Observable<Media> {
+    const album = defer(() => this.spotifyApi.getTrack(id, { limit: 1, offset: 0, market: 'DE' })).pipe(
+      retryWhen(errors => {
+        return this.errorHandler(errors);
+      }),
+      map((response: SpotifyTrackResponseItem) => {
+        const media: Media = {
+          id: response.id,
           artist: response.artists?.[0]?.name,
           title: response.name,
           cover: response?.images[0]?.url,

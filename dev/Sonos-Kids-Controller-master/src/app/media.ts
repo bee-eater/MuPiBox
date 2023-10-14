@@ -7,6 +7,7 @@ export interface Media {
     artistid?: string;
     showid?: string;
     playlistid?: string;
+    trackid?: string;
     release_date?: string;
     cover?: string;
     type: string;

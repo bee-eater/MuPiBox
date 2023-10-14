@@ -13,6 +13,7 @@ import { Resume } from '../resume';
 import { CurrentPlaylist } from '../current.playlist';
 import { CurrentEpisode } from '../current.episode';
 import { CurrentShow } from '../current.show';
+import { CurrentTrack } from '../current.track';
 import { Monitor } from '../monitor';
 import { AlbumStop } from '../albumstop';
 
@@ -49,6 +50,7 @@ export class PlayerPage implements OnInit {
   currentPlaylist: CurrentPlaylist;
   currentEpisode: CurrentEpisode;
   currentShow: CurrentShow;
+  currentTrack: CurrentTrack;
   playlistTrackNr = 0;
   showTrackNr = 0;
   goBackTimer = 0;
@@ -146,6 +148,9 @@ export class PlayerPage implements OnInit {
     });
     this.mediaService.show$.subscribe(show => {
       this.currentShow = show;
+    });
+    this.mediaService.show$.subscribe(track => {
+      this.currentTrack = track;
     });
 
     if(this.media.type === 'spotify'){
@@ -282,7 +287,9 @@ export class PlayerPage implements OnInit {
       this.resumeFile.spotify.progress_ms = this.currentPlayedSpotify?.progress_ms  || 0;
       this.resumeFile.spotify.duration_ms = this.currentEpisode?.duration_ms || 0;
     } else if(this.media.type === 'spotify'){
-      if(this.media.playlistid){
+      if(this.media.trackid){
+        this.resumeFile.spotify.track_number = null
+      } else if(this.media.playlistid){
         this.resumeFile.spotify.track_number = this.playlistTrackNr  || 0;
       }else{
         this.resumeFile.spotify.track_number = this.currentPlayedSpotify?.item.track_number  || 0;

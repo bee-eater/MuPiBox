@@ -102,6 +102,8 @@ export class PlayerService {
           url = 'spotify/now/spotify:album:' + encodeURIComponent(media.id) + ':0:0';
         } else if (media.showid) {
           url = 'spotify/now/spotify:episode:' + encodeURIComponent(media.showid) + ':0:0';
+        } else if (media.trackid) {
+          url = 'spotify/now/spotify:track:' + encodeURIComponent(media.trackid) + ':0:0';
         }
         break;
       }
@@ -125,6 +127,8 @@ export class PlayerService {
       url = 'spotify/now/spotify:album:' + encodeURIComponent(media.id) + ':' + resume.spotify.track_number + ':' + resume.spotify.progress_ms;
     } else if (media.showid) {
       url = 'spotify/now/spotify:episode:' + encodeURIComponent(media.showid) + ':' + resume.spotify.track_number + ':' + resume.spotify.progress_ms;
+    } else if (media.trackid) {
+      url = 'spotify/now/spotify:track:' + encodeURIComponent(media.trackid) + ':' + resume.spotify.progress_ms;
     }
 
     this.sendRequest(url);
@@ -148,6 +152,10 @@ export class PlayerService {
       }
       case 'spotify_playlistid': {
         url = 'validate/playlistid:' + encodeURIComponent(id);
+        break;
+      }
+      case 'spotify_trackid': {
+        url = 'validate/trackid:' + encodeURIComponent(id);
         break;
       }
     }

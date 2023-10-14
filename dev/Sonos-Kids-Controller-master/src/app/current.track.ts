@@ -1,14 +1,11 @@
 import { Image } from '../current.image';
 
-export interface CurrentShow {
-    total?: number;
-    items?: Item[];
-}
-
-export interface Item {
+export interface CurrentTrack {
     duration_ms?: number;
     id?: string;
     name?: string;
     type?: string;
-    images?: Image[];
+    album?:{
+        images?: Image[];
+    }
 }

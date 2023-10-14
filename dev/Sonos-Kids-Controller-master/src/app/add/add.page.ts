@@ -88,6 +88,8 @@ export class AddPage implements OnInit, AfterViewInit {
         this.searchType = 'show_id';
       }else if(this.source === 'spotify' && this.editMedia?.playlistid) {
         this.searchType = 'playlist_id';
+      }else if(this.source === 'spotify' && this.editMedia?.trackid) {
+        this.searchType = 'track_id';
       }
     }
     this.mediaService.validate$.subscribe(validate => {
@@ -172,6 +174,7 @@ export class AddPage implements OnInit, AfterViewInit {
     this.keyboard.clearInput('spotify_playlistid');
     this.keyboard.clearInput('spotify_artistid');
     this.keyboard.clearInput('spotify_artistcover');
+    this.keyboard.clearInput('spotify_trackid');
     this.keyboard.clearInput('spotify_query');
     this.keyboard.clearInput('spotify_aPartOfAllMin');
     this.keyboard.clearInput('spotify_aPartOfAllMax');
@@ -216,6 +219,9 @@ export class AddPage implements OnInit, AfterViewInit {
         case 'spotify_artistcover':
           this.keyboard.setInput(this.editMedia.artistcover, event.target.name);
           break;
+        case 'spotify_trackid':
+            this.keyboard.setInput(this.editMedia.trackid, event.target.name);
+            break;
         case 'spotify_query':
           this.keyboard.setInput(this.editMedia.query, event.target.name);
           break;
@@ -240,6 +246,25 @@ export class AddPage implements OnInit, AfterViewInit {
 
   inputChanged(event: any) {
     this.keyboard.setInput(event.target.value, event.target.name);
+    this.validate();
+  }
+
+  clearInputs(){
+    this.keyboard.clearInput('spotify_artist');
+    this.keyboard.clearInput('spotify_title');
+    this.keyboard.clearInput('spotify_id');
+    this.keyboard.clearInput('spotify_showid');
+    this.keyboard.clearInput('spotify_playlistid');
+    this.keyboard.clearInput('spotify_artistid');
+    this.keyboard.clearInput('spotify_artistcover');
+    this.keyboard.clearInput('spotify_trackid');
+    this.keyboard.clearInput('spotify_query');
+    this.keyboard.clearInput('spotify_aPartOfAllMin');
+    this.keyboard.clearInput('spotify_aPartOfAllMax');
+
+    this.keyboard.clearInput('radio_title');
+    this.keyboard.clearInput('radio_id');
+    this.keyboard.clearInput('radio_cover');
     this.validate();
   }
 
@@ -279,21 +304,7 @@ export class AddPage implements OnInit, AfterViewInit {
       this.source = 'spotify';
     }
     window.setTimeout(() => { // wait for new elements to be visible before altering them
-      this.keyboard.clearInput('spotify_artist');
-      this.keyboard.clearInput('spotify_title');
-      this.keyboard.clearInput('spotify_id');
-      this.keyboard.clearInput('spotify_showid');
-      this.keyboard.clearInput('spotify_playlistid');
-      this.keyboard.clearInput('spotify_artistid');
-      this.keyboard.clearInput('spotify_artistcover');
-      this.keyboard.clearInput('spotify_query');
-      this.keyboard.clearInput('spotify_aPartOfAllMin');
-      this.keyboard.clearInput('spotify_aPartOfAllMax');
-
-      this.keyboard.clearInput('radio_title');
-      this.keyboard.clearInput('radio_id');
-      this.keyboard.clearInput('radio_cover');
-      this.validate();
+      this.clearInputs();
     }, 10);
   }
 
@@ -331,6 +342,10 @@ export class AddPage implements OnInit, AfterViewInit {
           if (form.form.value.spotify_artistid?.length) {
             media.artistid = form.form.value.spotify_artistid;
             this.playerService.validateId(media.artistid, "spotify_artistid");
+          }
+          if (form.form.value.spotify_trackid?.length) {
+            media.trackid = form.form.value.spotify_trackid;
+            this.playerService.validateId(media.trackid, "spotify_trackid");
           }
           if (this.aPartOfAll) { 
             media.aPartOfAllMin = parseInt(form.form.value.spotify_aPartOfAllMin);
@@ -405,22 +420,7 @@ export class AddPage implements OnInit, AfterViewInit {
           } else {
             form.reset();
 
-            this.keyboard.clearInput('spotify_artist');
-            this.keyboard.clearInput('spotify_title');
-            this.keyboard.clearInput('spotify_id');
-            this.keyboard.clearInput('spotify_showid');
-            this.keyboard.clearInput('spotify_playlistid');
-            this.keyboard.clearInput('spotify_artistid');
-            this.keyboard.clearInput('spotify_artistcover');
-            this.keyboard.clearInput('spotify_query');
-            this.keyboard.clearInput('spotify_aPartOfAllMin');
-            this.keyboard.clearInput('spotify_aPartOfAllMax');
-        
-            this.keyboard.clearInput('radio_title');
-            this.keyboard.clearInput('radio_id');
-            this.keyboard.clearInput('radio_cover');
-        
-            this.validate();
+            this.clearInputs();
       
             this.playerService.sendCmd(PlayerCmds.CLEARVALIDATE);
       
@@ -465,22 +465,7 @@ export class AddPage implements OnInit, AfterViewInit {
           } else {
             form.reset();
 
-            this.keyboard.clearInput('spotify_artist');
-            this.keyboard.clearInput('spotify_title');
-            this.keyboard.clearInput('spotify_id');
-            this.keyboard.clearInput('spotify_showid');
-            this.keyboard.clearInput('spotify_playlistid');
-            this.keyboard.clearInput('spotify_artistid');
-            this.keyboard.clearInput('spotify_artistcover');
-            this.keyboard.clearInput('spotify_query');
-            this.keyboard.clearInput('spotify_aPartOfAllMin');
-            this.keyboard.clearInput('spotify_aPartOfAllMax');
-        
-            this.keyboard.clearInput('radio_title');
-            this.keyboard.clearInput('radio_id');
-            this.keyboard.clearInput('radio_cover');
-        
-            this.validate();
+            this.clearInputs();
             
             this.playerService.sendCmd(PlayerCmds.INDEX);
             this.playerService.sendCmd(PlayerCmds.CLEARVALIDATE);
@@ -520,6 +505,7 @@ export class AddPage implements OnInit, AfterViewInit {
       const query = this.keyboard.getInput('spotify_query');
       const show = this.keyboard.getInput('spotify_showid');
       const playlist = this.keyboard.getInput('spotify_playlistid');
+      const trackid = this.keyboard.getInput('spotify_trackid');
 
       this.valid = (
         (this.category === 'audiobook' || this.category === 'music') && (
@@ -534,6 +520,8 @@ export class AddPage implements OnInit, AfterViewInit {
           (show?.length > 0 && !(query?.length > 0))
           ||
           (playlist?.length > 0 && artist?.length > 0 && !(query?.length > 0))
+          ||
+          (trackid?.length > 0 && artist?.length > 0 && !(query?.length > 0))
           ||
           (this.edit && (artist?.length > 0))
           ||

@@ -139,6 +139,21 @@ export class MediaService {
                 })
               ),
               of([item]) // Single album. Also return as array, so we always have the same data type
+            ),
+            iif(
+              () => (item.type === 'spotify' && item.trackid && item.id.length > 0) ? true : false, // Get media by track
+              this.spotifyService.getMediaByTrackID(item.trackid, item.category).pipe(
+                map(currentItem => {  // If the user entered an user-defined artist or album name, overwrite values from spotify
+                  if (item.artist?.length > 0) {
+                    currentItem.artist = item.artist;
+                  }
+                  if (item.title?.length > 0) {
+                    currentItem.title = item.title;
+                  }
+                  return [currentItem];
+                })
+              ),
+              of([item]) // Single track. Also return as array, so we always have the same data type
             )
           )
         )
